@@ -1,6 +1,6 @@
 # Animated menu button with react-motion
 
-Inspiration from  [Nash Vail](https://medium.com/@nashvail/a-gentle-introduction-to-react-motion-dc50dd9f2459). article at medium
+Inspiration from  [Nash Vail's ](https://medium.com/@nashvail/a-gentle-introduction-to-react-motion-dc50dd9f2459) article at medium
 
 
 
