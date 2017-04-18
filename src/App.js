@@ -233,20 +233,24 @@ class App extends Component {
 
   	render() {
   		const {isOpen, childButtons, M_Y, M_X} = this.state;
+      const mainButtonRotation = isOpen ? { rotate: spring(0, { stiffness: 500, damping: 30 }) } : { rotate: spring(-135, { stiffness: 500, damping: 30 }) };
 
       return (
 			<Container>
 				{range(NUM_CHILDREN).map((index) => {
 			 		return childButtons[index];
 			 	})}
-
-				<MainBtn
-					style={this.mainButtonStyles(M_Y, M_X)}
-					onClick={this.openMenu}>
-          <FontAwesomeMainBtnIcon>
-            <FontAwesome name="plus" />
-          </FontAwesomeMainBtnIcon>
-        </MainBtn>
+            <MainBtn
+              style={this.mainButtonStyles(M_Y, M_X)}
+              onClick={this.openMenu}>
+                <Motion style={mainButtonRotation}>
+                  {({rotate}) =>
+                    <FontAwesomeMainBtnIcon style={{transform: `rotate(${rotate}deg)`}}>
+                      <FontAwesome name="plus" />
+                    </FontAwesomeMainBtnIcon>
+                  }
+              </Motion>
+            </MainBtn>
 			</Container>
 		);
   	}
