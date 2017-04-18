@@ -20,9 +20,10 @@ const CHILD_BUTTON_DIAM = 50;
 const NUM_CHILDREN = 5;
 // Hard coded position values of the mainButton
 //const M_X = 490;
+// const M_Y = 300;
  let M_X;
  let M_Y;
-// const M_Y = 300;
+
 
 // How far away from the main button does the child buttons go
 const FLY_OUT_RADIUS = 120,
@@ -32,7 +33,7 @@ const FLY_OUT_RADIUS = 120,
 
 // Names of icons for each button retreived from fontAwesome, we'll add a little extra just in case
 // the NUM_CHILDREN is changed to a bigger value
-let childButtonIcons = ['pencil', 'at', 'camera', 'bell', 'comment', 'bolt', 'ban', 'code'];
+const childButtonIcons = ['pencil', 'at', 'camera', 'bell', 'comment', 'bolt', 'ban', 'code'];
 
 // Utility functions
 
@@ -43,7 +44,7 @@ function toRadians(degrees) {
 }
 
 function finalDeltaPositions(index) {
-	let angle = BASE_ANGLE + ( index * SEPARATION_ANGLE );
+	const angle = BASE_ANGLE + ( index * SEPARATION_ANGLE );
 	return {
 		deltaX: FLY_OUT_RADIUS * Math.cos(toRadians(angle)) - (CHILD_BUTTON_DIAM/2),
 		deltaY: FLY_OUT_RADIUS * Math.sin(toRadians(angle)) + (CHILD_BUTTON_DIAM/2)
@@ -61,6 +62,9 @@ const MainBtn = styled.div`
   background-color: #72B0EC;
   border-radius: 50%;
   position: absolute;
+  display: flex;
+	justify-content: center;
+	text-align: center;
 `
 
 const ChildBtn = styled(MainBtn)`
@@ -73,8 +77,12 @@ const ChildBtn = styled(MainBtn)`
 const FontAwesomeIcon = styled.div`
 	margin: auto;
 	font-size: 1.3em;
+  color: #8A98A4;
 `
-
+const FontAwesomeMainBtnIcon = styled(FontAwesomeIcon)`
+  font-size: 2em;
+  color: #FEFEFE;
+`
 
 class App extends Component {
   constructor(props) {
@@ -91,7 +99,30 @@ class App extends Component {
 		this.openMenu = this.openMenu.bind(this);
 		this.updateDimensions = this.updateDimensions.bind(this);
 		this.updateChildButton = this.updateChildButton.bind(this);
+		this.hideChildButton = this.hideChildButton.bind(this);
 	}
+
+  componentWillUpdate(nextProps, nextState){
+    //before the first render isOpen is false in both states hide the childButtons
+    // to prevent updating all childButtons when you resize window
+    if(!this.state.isOpen === !nextState.isOpen){
+      window.addEventListener("resize", this.hideChildButton);
+    }
+    // when isOpen is changing state after initial mounting
+    if(this.state.isOpen !== nextState.isOpen){
+      //if closing menu hide children Buttons to prevent updating all childButtons when you resize window
+      if(!nextState.isOpen){
+        window.addEventListener("resize", this.updateDimensions);
+        window.addEventListener("resize", this.hideChildButton);
+      }
+      //if opening menu children Buttons will update their position according to mainButton
+      else {
+        window.addEventListener("resize", this.updateDimensions);
+        window.addEventListener("resize", this.updateChildButton);
+      }
+    }
+  }
+
 	componentWillMount() {
 		M_Y = window.innerHeight / 2;
 		M_X = window.innerWidth / 2;
@@ -103,13 +134,23 @@ class App extends Component {
 	}
 
 	componentDidMount() {
-		this.updateChildButton()
-		window.addEventListener("resize", this.updateDimensions);
-		window.addEventListener("resize", this.updateChildButton);
+    //on initial mount set state of childButtons to array of components
+    this.updateChildButton();
+    //on initial mount if windows change size mainButton will adjust it's position
+    //childButtons will be removed if window change size check first block of componentWillUpdate
+    window.addEventListener("resize", this.updateDimensions);
 	}
 
+  hideChildButton(){
+    const childButtons = [];
+    range(NUM_CHILDREN).forEach(index => {
+      childButtons.push(null);
+    });
+    this.setState({childButtons: childButtons.slice(0)});
+  }
+
 	updateChildButton(){
-		let childButtons = [];
+		const childButtons = [];
 		range(NUM_CHILDREN).forEach(index => {
 	 		childButtons.push(this.renderChildButton(index));
 	 	});
@@ -144,7 +185,7 @@ class App extends Component {
 	}
 
   finalChildButtonStyles(childIndex, M_Y, M_X) {
-  		let{deltaX, deltaY} = finalDeltaPositions(childIndex);
+  		const{deltaX, deltaY} = finalDeltaPositions(childIndex);
   		return {
   			width: CHILD_BUTTON_DIAM,
   			height: CHILD_BUTTON_DIAM,
@@ -154,12 +195,12 @@ class App extends Component {
   	}
 
   	openMenu() {
-  		let{isOpen} = this.state;
+  		const{isOpen} = this.state;
   		this.setState({
   			isOpen: !isOpen
   		});
 			range(NUM_CHILDREN).forEach((index) => {
-				let {childButtons} = this.state;
+				const {childButtons} = this.state;
 				setTimeout(() => {
 					childButtons[childButtons.length - 1 - index]	= this.renderChildButton(childButtons.length - 1 - index);
 					this.setState({childButtons: childButtons.slice(0)});
@@ -168,7 +209,7 @@ class App extends Component {
   	}
 
 		renderChildButton(index) {
-			let {isOpen, M_Y, M_X} = this.state
+			const {isOpen, M_Y, M_X} = this.state
 			let style = isOpen ? this.finalChildButtonStyles(index, M_Y, M_X) : this.initialChildButtonStyles(M_Y, M_X);
 			return (
 				<Motion style={style} key={index}>
@@ -191,17 +232,21 @@ class App extends Component {
 		}
 
   	render() {
-  		let {childButtons, M_Y, M_X} = this.state;
+  		const {isOpen, childButtons, M_Y, M_X} = this.state;
 
       return (
 			<Container>
-				{/* why this doesn't work with forEach loop???? */}
 				{range(NUM_CHILDREN).map((index) => {
 			 		return childButtons[index];
 			 	})}
+
 				<MainBtn
 					style={this.mainButtonStyles(M_Y, M_X)}
-					onClick={this.openMenu}/>
+					onClick={this.openMenu}>
+          <FontAwesomeMainBtnIcon>
+            <FontAwesome name="plus" />
+          </FontAwesomeMainBtnIcon>
+        </MainBtn>
 			</Container>
 		);
   	}
