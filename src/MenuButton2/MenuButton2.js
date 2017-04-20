@@ -1,23 +1,12 @@
 import React, { Component } from 'react';
-import { StaggeredMotion, spring, presets } from 'react-motion';
+import { Motion, StaggeredMotion, spring, presets } from 'react-motion';
 import styled from 'styled-components';
+import {Container, Wrapper, MainBtn, FontAwesomeMainBtnIcon, FontAwesomeIcon, Circle} from 'MenuButton2/MenuButton2.style';
+import FontAwesome from 'react-fontawesome'
 
-const Container = styled.div`
-  position: relative;
-  margin-left: 40vw;
-  margin-top: 20vw;
-`;
 
-const Circle = styled.div`
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  background-color: red;
-  position: absolute;
-  transform-origin: 50%;
-`;
-
-const RADIUS = 200;
+const RADIUS = 160;
+const childButtonIcons = ['pencil', 'at', 'camera', 'bell', 'comment', 'bolt', 'ban', 'code'];
 
 const wobbeSpring = (val) => spring(val, presets.wobbly);
 
@@ -28,7 +17,7 @@ class MenuButton2 extends Component {
       hidden: false
     };
 
-    this.buttonAngles = [0, 45, 90, 135, 180];
+    this.buttonAngles = [-180, -135, -90, -45, 0];
 
     this.getStyles = this.getStyles.bind(this);
     this.toggle = this.toggle.bind(this);
@@ -36,9 +25,10 @@ class MenuButton2 extends Component {
 
   getStyles(styles) {
     const { hidden } = this.state;
+
     return styles.map((style, i) => {
       if (i === 0) return {
-        radius: hidden ? wobbeSpring(0) : wobbeSpring(RADIUS),
+        radius: !hidden ? wobbeSpring(0) : wobbeSpring(RADIUS),
       };
 
       return {
@@ -56,22 +46,42 @@ class MenuButton2 extends Component {
   }
 
   render() {
+    const {hidden} = this.state
+    const mainButtonRotation = hidden ? { rotate: spring(0, { stiffness: 500, damping: 30 }) } : { rotate: spring(-135, { stiffness: 500, damping: 30 }) };
     return (
       <Container>
-        <button onClick={this.toggle}>Toggle</button>
-        <StaggeredMotion
-          defaultStyles={this.getDefaultStyles()}
-          styles={this.getStyles}>
-          {(styles) =>
-            <div>
-              {styles.map(({ radius }, index) =>
+        <Wrapper>
+          <StaggeredMotion
+            defaultStyles={this.getDefaultStyles()}
+            styles={this.getStyles}>
+            {(styles) =>
+              <div>
+                {styles.map(({ radius }, index) =>
                 <Circle key={index} style={{
                   transform: `rotate(${this.buttonAngles[index]}deg) translateX(${radius}px)`
-                }}/>
-              )}
-            </div>
-          }
-        </StaggeredMotion>
+                }}>
+                  <FontAwesomeIcon style={{
+                    transform: `rotate(${360 - this.buttonAngles[index]}deg)`
+                  }}>
+                    <FontAwesome name={childButtonIcons[index]} />
+                  </FontAwesomeIcon>
+                </Circle>
+                )}
+              </div>
+            }
+          </StaggeredMotion>
+          <MainBtn
+            style={mainButtonRotation}
+            onClick={this.toggle}>
+              <Motion style={mainButtonRotation}>
+                {({rotate}) =>
+                  <FontAwesomeMainBtnIcon style={{transform: `rotate(${rotate}deg)`}}>
+                    <FontAwesome name="plus" />
+                  </FontAwesomeMainBtnIcon>
+                }
+            </Motion>
+          </MainBtn>
+        </Wrapper>
       </Container>
     );
   }
