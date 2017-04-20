@@ -3,8 +3,8 @@ import React, { Component } from 'react'
 // similary range(2) retursn this array [0, 1]
 // and so on
 import range from 'lodash.range'
-import styled from 'styled-components'
 import {Motion, spring} from 'react-motion'
+import styled from 'styled-components'
 import FontAwesome from 'react-fontawesome'
 
 import './App.css'
